@@ -1,0 +1,6 @@
+# DATA
+*.ppm
+*.h5
+
+# FOLDERS
+plotly/

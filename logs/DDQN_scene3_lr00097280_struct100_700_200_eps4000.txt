@@ -1,0 +1,39 @@
+"DDQN_scene3_lr00097280_struct100_700_200_eps4000"
+
+state_space : 51
+action_space : 72
+epsilon_decay_linear : 4000
+learning_rate : 0.0009728009983619987
+dense_layer : 100
+state_layer : 700
+advantage_layer : 200
+w_training : 128
+h_training : 128
+w_test : 128
+h_test : 128
+samples_training : 8
+samples_test : 10
+select_max_Q : true
+select_average_Q : false
+scene : "3"
+num_object : 19
+gaussian_kernel : true
+training : true
+test : true
+limit_training : 10000
+kernel_size : 16
+bayesOpt : true
+reference_path : "images\\reference\\reference_scene3_128x128_5120spp.png"
+path_SSIM_total : "logs\\SSIM_total_20200313094337.txt"
+img_title : "DDQN_scene3_lr00097280_struct100_700_200_eps4000"
+weight : "weights_scene3_DDQN_scene3_lr00097280_struct100_700_200_eps4000.h5"
+SSIM score (0 episode) : 0.025014206121521786
+SSIM score (1 episode) : 0.03179267665575564
+SSIM score (2 episode) : 0.0370140851466168
+SSIM score (3 episode) : 0.04088767110573143
+SSIM score (4 episode) : 0.04390295370349345
+SSIM score (5 episode) : 0.04682665990949428
+SSIM score (6 episode) : 0.048368795747221645
+SSIM score (7 episode) : 0.050211039076655715
+SSIM score (8 episode) : 0.05217365694099047
+SSIM score (9 episode) : 0.053415964812113796
