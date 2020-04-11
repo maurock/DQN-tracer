@@ -18,12 +18,12 @@ params['state_layer'] = 200
 params['advantage_layer'] = 400
 
 # Rendering
-params['w_training'] = 24
-params['h_training'] = 24
-params['w_test'] = 128
-params['h_test'] = 128
-params['samples_training'] = 3
-params['samples_test'] = 3
+params['w_training'] = 128
+params['h_training'] = 128
+params['w_test'] = 256
+params['h_test'] = 256
+params['samples_training'] = 8
+params['samples_test'] = 8
 
 # Options
 params['select_max_Q'] = True
@@ -33,12 +33,12 @@ params['num_object'] = 18 if (params['scene'] == '1' or params['scene'] == '2') 
 params['gaussian_kernel'] = True
 params['training'] = True
 params['test'] = True
-params['limit_training'] = 100 #int(0.8*params['w_training']*params['h_training'])
+params['limit_training'] = 10000 #int(0.8*params['w_training']*params['h_training'])
 params['kernel_size'] = 16
-params['bayesOpt'] = True
+params['bayesOpt'] = False
 
 # Folders
-params['reference_path'] = 'images\\reference\\reference_scene3_128x128_5120spp.png'
+params['reference_path'] = 'images\\reference\\reference_scene3_256x256_5120spp.png'
 params['path_SSIM_total'] = 'logs\\SSIM_total_' + str(datetime.datetime.now().strftime("%Y%m%d%H%M%S")) +'.txt'
 
 
@@ -104,10 +104,6 @@ class BayesianOptimizer():
             file.write('Optimized epsilon linear decay: ' + bayes_optimizer.x_opt[4])
         return self.params
 
-
-
-
-
 ##################
 #      Main      #
 ##################
@@ -117,12 +113,12 @@ if __name__ == '__main__':
     if params['bayesOpt'] == False:
         # Set automatic parameters
         lr_string = '{:.8f}'.format(params["learning_rate"])[2:]
-        params['img_title'] = 'DDQN_scene{}_lr{}_struct{}_{}_{}_eps{}_NotOpt'.format(params['scene'],lr_string,
+        params['img_title'] = 'DDQN_scene{}_lr{}_struct{}_{}_{}_eps{}_TEST'.format(params['scene'],lr_string,
                                             params['dense_layer'],params['state_layer'],params['advantage_layer'],params['epsilon_decay_linear'])
         params['weight'] = 'weights_scene{}_'.format(params['scene']) + params['img_title'] + '.h5'
 
         # Custom weight
-        #params['weight'] = 'weights_scene3_DDQN_scene3_lr00001000_struct1000_200_400_eps5000_NotOpt.h5'
+        #params['weight'] = 'weights-lr00001-relu-nnx4-newAction-maxAction-eps5000-DDQN_struct4-.h5'
 
         main(params)
 

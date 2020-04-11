@@ -30,8 +30,7 @@ from keras.layers import Input, Dense, Lambda, Add
 from keras import backend as K
 from keras.models import Model
 import tensorflow
-
-
+import collections
 
 class DQN:
     def __init__(self, params):
@@ -48,6 +47,9 @@ class DQN:
         self.model = self.network()
         self.model_target = self.network_target()
         self.dict_act_dir = {}
+        self.memory_batch_max_size = 200
+        self.memory_batch_sample_size = 60
+        self.memory_batch = np.empty((1,7))
 
     # Defining DDQN.
     # properties of DQN ------------------------------
@@ -115,7 +117,6 @@ class DQN:
             return action_idx
         arr = self.model.predict(state.reshape(1, self.state_space))
         arr[0] = arr[0].clip(min=0.1)
-
         idx_action = get_proportional_action(arr[0], len(arr[0]))
         if (idx_action < 12):
             prob_patch = 0.045620675
@@ -129,14 +130,13 @@ class DQN:
             prob_patch = 0.088541589
         else:
             prob_patch = 0.213758305
-
         hitobj.set_prob((arr[0].sum()*prob_patch)/(arr[0][idx_action]))  # prob of getting the hights value (1) times prob scattering to a specific direction inside the action patch
         hitobj.set_BRDF(1/math.pi)
         hitobj.set_costheta(dict_act[idx_action].get_z())
         return idx_action
 
-
-    def train(self, state, action, reward, next_state, done,BRDF, dict_act, nl, params):
+    # Train agent
+    def train(self, state, action, reward, next_state, done, BRDF, dict_act, nl, params):
         if done == 1:
             target = reward
         else:
@@ -157,6 +157,47 @@ class DQN:
         target_f[0] = target_f[0].clip(min=0.1)
         target_f[0][action] = target
         self.model.fit(state.reshape(1, self.state_space), target_f, epochs=1, verbose=0)
+
+    # Store observations in batches for replay memory
+    def store_memory(self, state, action, reward, next_state, done, BRDF, nl):
+        if self.memory_batch.shape[0] == self.memory_batch_max_size:
+            self.memory_batch = self.memory_batch[1:]
+        elif type(self.memory_batch[0][0])==np.float64:   # handle first empty array
+            self.memory_batch = self.memory_batch[1:]
+
+        self.memory_batch = np.append(self.memory_batch, np.expand_dims(np.array([state, action, reward, next_state, done, BRDF, nl]),axis=0), axis=0)  # self.memory_batch_max_size
+
+    # Replay memory
+    def replay_memory(self, params, dict_act):
+        if self.memory_batch.shape[0] > self.memory_batch_sample_size:
+            batch = random.sample(list(self.memory_batch), self.memory_batch_sample_size)
+            x_array = []
+            y_array = []
+            for state, action, reward, next_state, done, BRDF, nl in batch:
+                if done == 1:
+                    target = reward
+                else:
+                    prediction = self.model_target.predict(next_state.reshape(1, self.state_space))
+                    prediction[0] = prediction[0].clip(min=0.1)
+
+                    # Max Q
+                    if params['select_max_Q']:
+                        action_int_q = np.argmax(prediction[0])
+                        cos_theta_q = dict_act[action_int_q].get_z()
+                        target = reward + np.amax(prediction[0]) * cos_theta_q * BRDF
+                    else:
+                        # Average Q
+                        cumulative_q_value = cumulative_q(dict_act, nl, prediction[0])
+                        target = reward + 1 / self.action_space * cumulative_q_value * BRDF
+                target_f = self.model.predict(state.reshape(1, self.state_space))
+                target_f[0] = target_f[0].clip(min=0.1)
+                target_f[0][action] = target
+                x_array.append(state)
+                y_array.append(target_f.reshape(self.action_space))
+            self.model.fit(np.asarray(x_array), np.asarray(y_array), batch_size=self.memory_batch_sample_size, epochs=1, verbose=0)
+
+
+
 
 
 

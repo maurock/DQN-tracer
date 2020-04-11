@@ -5,6 +5,7 @@ import copy
 from skimage.measure import compare_ssim
 from PIL import Image
 import numpy as np
+from tqdm import tqdm
 
 class Counter:
     def __init__(self):
@@ -38,9 +39,7 @@ def radiance(ray, depth, dict, agent, count, counter_bouncer, params):
         if (not hitobj.get_hit()):
             print("HAPPENED")
             return Vec()
-
         counter_bouncer.full_count += 1
-
         if depth > 5 and hitobj.get_e().get_x() < 1:
             continue_probability = F.get_max()
             if random.random() >= continue_probability:
@@ -79,7 +78,8 @@ def radiance(ray, depth, dict, agent, count, counter_bouncer, params):
 
         if params['training']:
             if depth > 1 and count < params['limit_training']:
-                agent.train(state, action_int, reward, next_state, done, hitobj.get_BRDF(), dict, nl, params)
+                agent.store_memory(state, action_int, reward, next_state, done, hitobj.get_BRDF(), nl)
+                #agent.train(state, action_int, reward, next_state, done, hitobj.get_BRDF(), dict, nl, params)
         if done:
             return L
 
@@ -108,12 +108,13 @@ def main(params):
         agent = DQN(params)
         counter_bounces = Counter()
         i = 0
-        for y in range(params['h_training']):
+        for y in tqdm(range(params['h_training']), desc='Rendering ({0} spp), learning rate {1:11.8f}'.format(params['samples_training'],agent.learning_rate), position=0, leave=True):
             if i > params['limit_training']:
                 break
             # pixel row
-            print('\rRendering ({0} spp) {1:0.2f}% learning rate {2:11.8f}'.format(params['samples_training'], 100.0 * y / (params['h_training'] - 1),agent.learning_rate))
+            #print('\rRendering ({0} spp) {1:0.2f}% learning rate {2:11.8f}'.format(params['samples_training'], 100.0 * y / (params['h_training'] - 1),agent.learning_rate))
             for x in range(params['w_training']):
+
                 if i > params['limit_training']:
                     break
                 for s in range(params['samples_training']):
@@ -122,11 +123,13 @@ def main(params):
                     d = cam.get_ray(u, v)
                     rad = radiance(Ray(d.o, d.d.norm()), 0, dict, agent, i, counter_bounces, params)
                     L += rad * (1.0 / params['samples_training'])
+                agent.replay_memory(params,dict)
                 Ls[i][0] = clamp(L.get_x())
                 Ls[i][1] = clamp(L.get_y())
                 Ls[i][2] = clamp(L.get_z())
                 L = Vec()
                 i += 1
+
                 if i < params['limit_training']:
                     agent.model_target = agent.model
                     if agent.exploration_rate > agent.epsilon_min:
@@ -154,13 +157,14 @@ def main(params):
         weights_path = 'weights\\' + params['weight']
         agent.model = agent.network(weights_path)
         agent.exploration_rate = 0
+        print('\rRendering ({0} spp)'.format(params['samples_training']))
         for s in range(0, params['samples_test']):
             print('\rSample number: ', s)
             i = 0
-            for y in range(params['h_test']):
+            for y in tqdm(range(params['h_test']), position=0, leave=True):
                 # pixel row
-                print('\rRendering ({0} spp) {1:0.2f}%'.format(params['samples_test'], 100.0 * y / (
-                        params['h_test'] - 1)))  # , 'reward ratio:', counter_bounces.reward_count/counter_bounces.full_count)
+                #print('\rRendering ({0} spp) {1:0.2f}%'.format(params['samples_test'], 100.0 * y / (
+                #        params['h_test'] - 1)))  # , 'reward ratio:', counter_bounces.reward_count/counter_bounces.full_count)
                 for x in range(params['w_test']):
                     u = (x - 0.5 + random.random()) / params['w_test']
                     v = ((params['h_test'] - y - 1) - 0.5 + random.random()) / params['h_test']
