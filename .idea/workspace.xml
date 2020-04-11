@@ -2,12 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="245e8a6b-1a5b-437b-836d-045cc3259ad7" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/py-smallpt-pybind.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/py-smallpt-pybind.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DQNAgent_DDQN.py" beforeDir="false" afterPath="$PROJECT_DIR$/DQNAgent_DDQN.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bayesOpt.py" beforeDir="false" afterPath="$PROJECT_DIR$/bayesOpt.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images/reference/reference_scene3_128x128_5120spp.png" beforeDir="false" afterPath="$PROJECT_DIR$/images/reference/reference_scene3_128x128_5120spp.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/py_smallpt_newactions.py" beforeDir="false" afterPath="$PROJECT_DIR$/py_smallpt_newactions.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -70,8 +67,9 @@
   </component>
   <component name="PropertiesComponent">
     <property name="ToolWindowEvent Log.ShowToolbar" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="F:/DATA/smallpt/bayesOpt.py" />
     <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
+    <property name="two.files.diff.last.used.file" value="F:/DATA/smallpt/bayesOpt.py" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -215,10 +213,14 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
-    <state x="739" y="274" key="FileChooserDialogImpl" timestamp="1586025803380">
+    <state x="92" y="92" width="1736" height="856" key="DiffContextDialog" timestamp="1586599120856">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="739" y="274" key="FileChooserDialogImpl/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1586025803380" />
+    <state x="92" y="92" width="1736" height="856" key="DiffContextDialog/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1586599120856" />
+    <state x="739" y="274" key="FileChooserDialogImpl" timestamp="1586599031691">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="739" y="274" key="FileChooserDialogImpl/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1586599031691" />
     <state width="1160" height="375" key="GridCell.Tab.0.bottom" timestamp="1586083131544">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -290,7 +292,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/DQNAgent_DDQN.py</url>
-          <line>195</line>
+          <line>197</line>
           <option name="timeStamp" value="20" />
         </line-breakpoint>
       </breakpoints>

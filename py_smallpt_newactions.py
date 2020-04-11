@@ -78,8 +78,7 @@ def radiance(ray, depth, dict, agent, count, counter_bouncer, params):
 
         if params['training']:
             if depth > 1 and count < params['limit_training']:
-                agent.store_memory(state, action_int, reward, next_state, done, hitobj.get_BRDF(), nl)
-                #agent.train(state, action_int, reward, next_state, done, hitobj.get_BRDF(), dict, nl, params)
+                agent.train(state, action_int, reward, next_state, done, hitobj.get_BRDF(), dict, nl, params)
         if done:
             return L
 
@@ -123,7 +122,6 @@ def main(params):
                     d = cam.get_ray(u, v)
                     rad = radiance(Ray(d.o, d.d.norm()), 0, dict, agent, i, counter_bounces, params)
                     L += rad * (1.0 / params['samples_training'])
-                agent.replay_memory(params,dict)
                 Ls[i][0] = clamp(L.get_x())
                 Ls[i][1] = clamp(L.get_y())
                 Ls[i][2] = clamp(L.get_z())

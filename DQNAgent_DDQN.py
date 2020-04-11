@@ -37,9 +37,12 @@ class DQN:
         self.state_space = params['state_space']
         self.action_space = params['action_space']
         self.learning_rate = params['learning_rate']
-        self.dense_layer = params['dense_layer']
-        self.state_layer = params['state_layer']
-        self.advantage_layer = params['advantage_layer']
+        self.dense_layer12 = params['dense_layer12']
+        self.dense_layer3 = params['dense_layer3']
+        self.state_layer1 = params['state_layer1']
+        self.state_layer2 = params['state_layer2']
+        self.advantage_layer1 = params['advantage_layer1']
+        self.advantage_layer2 = params['advantage_layer2']
         self.exploration_rate = 1 # exploration rate
         self.epsilon_decay = 0.999
         self.epsilon_decay_linear = params['epsilon_decay_linear']
@@ -47,25 +50,23 @@ class DQN:
         self.model = self.network()
         self.model_target = self.network_target()
         self.dict_act_dir = {}
-        self.memory_batch_max_size = 200
-        self.memory_batch_sample_size = 60
-        self.memory_batch = np.empty((1,7))
 
     # Defining DDQN.
     # properties of DQN ------------------------------
     def network(self, weights=None):
 
         input_layer = Input(shape=(self.state_space,))
-        x = (Dense(self.dense_layer, activation='relu'))(input_layer)
-        x = (Dense(self.dense_layer, activation='relu'))(x)
-        x = (Dense(self.dense_layer, activation='relu'))(x)
+        x = (Dense(self.dense_layer12, activation='relu'))(input_layer)
+        x = (Dense(self.dense_layer12, activation='relu'))(x)
+        x = (Dense(self.dense_layer3, activation='relu'))(x)
 
-        xs = (Dense(self.state_layer, activation='relu'))(x)
+        xs = (Dense(self.state_layer1, activation='relu'))(x)
+        xs = (Dense(self.state_layer2, activation='relu'))(xs)
         state_value = Dense(1)(xs)
         state_value = Lambda(lambda s: K.expand_dims(s[:, 0], -1), output_shape=(self.action_space,))(state_value)
 
-        xa = (Dense(self.advantage_layer))(x)
-        xa = (Dense(self.advantage_layer))(xa)
+        xa = (Dense(self.advantage_layer1))(x)
+        xa = (Dense(self.advantage_layer2))(xa)
         action_advantage = Dense(self.action_space)(xa)
         action_advantage = Lambda(lambda a: a[:, :] - K.mean(a[:, :], keepdims=True), output_shape=(self.action_space,))(action_advantage)
 
@@ -83,16 +84,17 @@ class DQN:
     # TARGET -------------------------------- !!!!!!!!
     def network_target(self, weights=None):
         input_layer = Input(shape=(self.state_space,))
-        x = (Dense(self.dense_layer, activation='relu'))(input_layer)
-        x = (Dense(self.dense_layer, activation='relu'))(x)
-        x = (Dense(self.dense_layer, activation='relu'))(x)
+        x = (Dense(self.dense_layer12, activation='relu'))(input_layer)
+        x = (Dense(self.dense_layer12, activation='relu'))(x)
+        x = (Dense(self.dense_layer3, activation='relu'))(x)
 
-        xs = (Dense(self.state_layer, activation='relu'))(x)
+        xs = (Dense(self.state_layer1, activation='relu'))(x)
+        xs = (Dense(self.state_layer2, activation='relu'))(xs)
         state_value = Dense(1)(xs)
         state_value = Lambda(lambda s: K.expand_dims(s[:, 0], -1), output_shape=(self.action_space,))(state_value)
 
-        xa = (Dense(self.advantage_layer))(x)
-        xa = (Dense(self.advantage_layer))(xa)
+        xa = (Dense(self.advantage_layer1))(x)
+        xa = (Dense(self.advantage_layer2))(xa)
         action_advantage = Dense(self.action_space)(xa)
         action_advantage = Lambda(lambda a: a[:, :] - K.mean(a[:, :], keepdims=True),
                                   output_shape=(self.action_space,))(action_advantage)
