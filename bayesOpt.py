@@ -25,8 +25,8 @@ params['w_training'] = 128
 params['h_training'] = 128
 params['w_test'] = 256
 params['h_test'] = 256
-params['samples_training'] = 8
-params['samples_test'] = 32
+params['samples_training'] = 2
+params['samples_test'] = 3
 
 # Options
 params['select_max_Q'] = True
@@ -34,9 +34,9 @@ params['select_average_Q'] = not params['select_max_Q']
 params['scene'] = '3'
 params['num_object'] = 18 if (params['scene'] == '1' or params['scene'] == '2') else 19
 params['gaussian_kernel'] = True
-params['training'] = False
+params['training'] = True
 params['test'] = True
-params['limit_training'] = 10000 #int(0.8*params['w_training']*params['h_training'])
+params['limit_training'] = 400 #int(0.8*params['w_training']*params['h_training'])
 params['kernel_size'] = 16
 params['bayesOpt'] = False
 
@@ -131,7 +131,7 @@ if __name__ == '__main__':
     if params['bayesOpt'] == False:
         # Set automatic parameters
         lr_string = '{:.8f}'.format(params["learning_rate"])[2:]
-        params['img_title'] = 'DDQN_scene{}_lr{}_struct{}-{}_{}-{}_{}-{}_eps{}'.format(params['scene'],
+        params['img_title'] = 'DDQN_scene{}_lr{}_struct{}-{}_{}-{}_{}-{}_eps{}_TEST_DOUBLE_ACTION'.format(params['scene'],
                                                                                         lr_string,
                                                                                         params['dense_layer12'],
                                                                                         params['dense_layer3'],
@@ -143,8 +143,8 @@ if __name__ == '__main__':
         #params['weight'] = 'weights_scene{}_'.format(params['scene']) + params['img_title'] + '.h5'
 
         # Custom weight
-        params['weight'] = 'weights_scene3_DDQN_scene3_lr00000866_struct500-700_400-400_600-700_eps5000.h5'
-
+        params['weight'] = 'weights_scene3_DDQN_scene3_best.h5'
+        params['weight_double_action'] = 'weights_double_action_scene3_DDQN_scene3.h5'
         main(params)
 
     # Bayesian Optimization

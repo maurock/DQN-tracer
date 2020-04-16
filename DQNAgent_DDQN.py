@@ -51,6 +51,11 @@ class DQN:
         self.model_target = self.network_target()
         self.dict_act_dir = {}
 
+        self.state_space_double_action = 52
+        self.action_space_double_action = 12
+        self.model_double_action = self.network_double_action()
+
+
     # Defining DDQN.
     # properties of DQN ------------------------------
     def network(self, weights=None):
@@ -109,6 +114,31 @@ class DQN:
             print("weights loaded")
         return model
 
+    def network_double_action(self, weights=None):
+        input_layer = Input(shape=(self.state_space_double_action,))
+        x = (Dense(150, activation='relu'))(input_layer)
+        x = (Dense(300, activation='relu'))(x)
+
+        xs = (Dense(150, activation='relu'))(x)
+        state_value = Dense(1)(xs)
+        state_value = Lambda(lambda s: K.expand_dims(s[:, 0], -1), output_shape=(self.action_space_double_action,))(state_value)
+
+        xa = (Dense(150))(x)
+        xa = (Dense(150))(xa)
+        action_advantage = Dense(12)(xa)
+        action_advantage = Lambda(lambda a: a[:, :] - K.mean(a[:, :], keepdims=True),
+                                  output_shape=(self.action_space_double_action,))(action_advantage)
+
+        X = Add()([state_value, action_advantage])
+        model = Model(input=input_layer, output=X)
+        opt = Adam(self.learning_rate)
+        model.compile(loss='mse', optimizer=opt)
+
+        if weights:
+            model.load_weights(weights)
+            print("weights loaded")
+        return model
+
     # Predict action based on current state
     def do_action(self, state, hitobj, dict_act):
         if np.random.rand() <= self.exploration_rate:
@@ -137,6 +167,43 @@ class DQN:
         hitobj.set_costheta(dict_act[idx_action].get_z())
         return idx_action
 
+    # Predict action based on current state for double actions
+    def do_action_double_action(self, state, hitobj, dict_act):
+        if np.random.rand() <= self.exploration_rate:
+            action_idx = np.random.randint(0, self.action_space)
+            double_action_idx = np.random.randint(0, self.action_space_double_action)
+            hitobj.set_prob(1)  # microptimization
+            hitobj.set_BRDF(1)  # microptimization
+            hitobj.set_costheta(1)
+            return action_idx, double_action_idx, np.concatenate((state, np.array([action_idx/10])), axis = 0)
+        arr = self.model.predict(state.reshape(1, self.state_space))
+        arr[0] = arr[0].clip(min=0.1)
+        idx_action = get_proportional_action(arr[0], len(arr[0]))
+        if (idx_action < 12):
+            prob_patch = 0.045620675/12
+        elif (idx_action >= 12 and idx_action < 24):
+            prob_patch = 0.050461491/12
+        elif (idx_action >= 24 and idx_action < 36):
+            prob_patch = 0.057276365/12
+        elif (idx_action >= 36 and idx_action < 48):
+            prob_patch = 0.067940351/12
+        elif (idx_action >= 48 and idx_action < 60):
+            prob_patch = 0.088541589/12
+        else:
+            prob_patch = 0.213758305/12
+
+        state_double_action = np.concatenate((state, np.array([idx_action/10])), axis = 0)
+
+        # TODO fix
+        arr2 = self.model_double_action.predict(state_double_action.reshape(1, self.state_space_double_action))
+        arr2[0] = arr2[0].clip(min=0.1)
+        double_action_idx = get_proportional_action(arr2[0], len(arr2[0]))
+
+        hitobj.set_prob((arr[0].sum() * arr2[0].sum()*prob_patch) / (arr[0][idx_action] * arr2[0][double_action_idx]))  # prob of getting the hights value (1) times prob scattering to a specific direction inside the action patch
+        hitobj.set_BRDF(1 / math.pi)
+        hitobj.set_costheta(dict_act[idx_action].get_z())
+        return idx_action, double_action_idx, state_double_action
+
     # Train agent
     def train(self, state, action, reward, next_state, done, BRDF, dict_act, nl, params):
         if done == 1:
@@ -159,6 +226,31 @@ class DQN:
         target_f[0] = target_f[0].clip(min=0.1)
         target_f[0][action] = target
         self.model.fit(state.reshape(1, self.state_space), target_f, epochs=1, verbose=0)
+
+    # Train agent
+    def train_double_action(self, state, action, action_double_action, reward, next_state, done, BRDF, dict_act, nl, params):
+        if done == 1:
+            target = reward
+        else:
+            prediction = self.model_double_action.predict(next_state.reshape(1, self.state_space_double_action))
+            prediction[0] = prediction[0].clip(min=0.1)
+
+            # Max Q
+            # TODO: improve cos_theta precision
+            if params['select_max_Q']:
+                cos_theta_q = dict_act[action].get_z()
+                target = reward + np.amax(prediction[0]) * cos_theta_q * BRDF
+            # TODO: fix average Q
+            else:
+                # Average Q
+                cumulative_q_value = cumulative_q(dict_act, nl, prediction[0])
+                target = reward + 1 / self.action_space * cumulative_q_value * BRDF
+
+        target_f = self.model_double_action.predict(state.reshape(1, self.state_space_double_action))
+        target_f[0] = target_f[0].clip(min=0.1)
+        target_f[0][action_double_action] = target
+        self.model_double_action.fit(state.reshape(1, self.state_space_double_action), target_f, epochs=1, verbose=0)
+
 
     # Store observations in batches for replay memory
     def store_memory(self, state, action, reward, next_state, done, BRDF, nl):

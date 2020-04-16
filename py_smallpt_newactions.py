@@ -73,20 +73,26 @@ def radiance(ray, depth, dict, agent, count, counter_bouncer, params):
             gaussiana_y[np.abs(gaussiana_y) < 0.01] = 0
             gaussiana_z = gaussian(arr_line, p.get_z() / 170, 1 / params['kernel_size'])
             gaussiana_z[np.abs(gaussiana_z) < 0.01] = 0
-            next_state = np.concatenate(
-                (gaussiana_x, gaussiana_y, gaussiana_z, np.array([nl.get_x(), nl.get_y(), nl.get_z()])), axis=0)
+            next_state = np.concatenate((gaussiana_x, gaussiana_y, gaussiana_z, np.array([nl.get_x(), nl.get_y(), nl.get_z()])), axis=0)
 
         if params['training']:
             if depth > 1 and count < params['limit_training']:
                 agent.train(state, action_int, reward, next_state, done, hitobj.get_BRDF(), dict, nl, params)
+
+        next_action_int, next_double_action_int, next_state_double_action = agent.do_action_double_action(next_state, hitobj,dict)
+
+        if params['training']:
+            if depth > 1 and count < params['limit_training']:
+                agent.train_double_action(state_double_action, action_int, double_action_int, reward, next_state_double_action, done, hitobj.get_BRDF(), dict, nl, params)
         if done:
             return L
 
-        action_int = agent.do_action(next_state, hitobj, dict)
         F = F.mult(hitobj.get_c()) * hitobj.get_prob() * hitobj.get_BRDF() * hitobj.get_costheta()
-        ray = Ray(p, DQNScattering(dict, nl, action_int).norm())
+        ray = Ray(p, DQNScattering(dict, nl, next_action_int, next_double_action_int).norm())
         state = copy.deepcopy(next_state)
-
+        state_double_action = copy.deepcopy(next_state_double_action)
+        double_action_int = copy.deepcopy(next_double_action_int)
+        action_int = copy.deepcopy(next_action_int)
 
 def main(params):
     # Save params
@@ -135,6 +141,7 @@ def main(params):
                 if i > params['limit_training']:
                     print("params[weight : ",params['weight'] )
                     agent.model.save_weights("weights\\" + params['weight'])
+                    agent.model_double_action.save_weights("weights\\" + params['weight_double_action'])
                     print("Weights saved...")
                     time.sleep(3)
                     break
@@ -153,7 +160,10 @@ def main(params):
         counter_bounces = Counter()
         agent.exploration_rate = 0
         weights_path = 'weights\\' + params['weight']
+        weights_path_double_action = 'weights\\' + params['weight_double_action']
         agent.model = agent.network(weights_path)
+        agent.model_double_action = agent.network_double_action(weights_path_double_action)
+
         agent.exploration_rate = 0
         print('\rRendering ({0} spp)'.format(params['samples_training']))
         for s in range(0, params['samples_test']):
