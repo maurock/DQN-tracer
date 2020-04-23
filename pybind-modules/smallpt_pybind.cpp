@@ -10,8 +10,8 @@ namespace py = pybind11;
 // Settings
 int action_space = 72;
 bool equally_sized_patches = false;
-bool not_equally_sized_patches = false;
-bool double_action_space = true;
+bool not_equally_sized_patches = true;
+bool double_action_space = false; //based on not equally sized patches
 
 struct Vec {
 	float x, y, z;                  // position, also color (r,g,b)
