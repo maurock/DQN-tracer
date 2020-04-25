@@ -6,6 +6,7 @@ from skimage.measure import compare_ssim
 from PIL import Image
 import numpy as np
 from tqdm import tqdm
+import pickle
 
 class Counter:
     def __init__(self):
@@ -25,7 +26,7 @@ def score(final_image, reference_image_path, params, s):
         file.write("SSIM score (" + str(s) + " episode) : " + str(ssim) + "\n")
     return ssim
 
-def radiance(ray, depth, dict, agent, count, counter_bouncer, params):
+def radiance(ray, depth, dict_act, agent, count, counter_bouncer, params, dict_state):
     L = Vec()
     F = Vec(1.0, 1.0, 1.0)
     hitobj = Hit_record()
@@ -36,6 +37,7 @@ def radiance(ray, depth, dict, agent, count, counter_bouncer, params):
     while True:
         done = 0
         p = hittingPoint(ray, hitobj, params['num_object'])
+
         if (not hitobj.get_hit()):
             print("HAPPENED")
             return Vec()
@@ -77,26 +79,41 @@ def radiance(ray, depth, dict, agent, count, counter_bouncer, params):
 
         if params['training'] and not params['double_action']:
             if depth > 1 and count < params['limit_training']:
-                agent.train(state, action_int, reward, next_state, done, hitobj.get_BRDF(), dict, nl, params)
+                q_value = agent.train(state, action_int, reward, next_state, done, hitobj.get_BRDF(), dict_act, nl, params)
+
+                if params['discretize_state']:
+                    # Discretize state
+                    key = (math.ceil(p_old.get_x() / 5), math.ceil(p_old.get_y() / 5), math.ceil(p_old.get_z() / 5),
+                                math.ceil(nl_old.get_x()), math.ceil(nl_old.get_y()), math.ceil(nl_old.get_z()))
+                    scattering_dir_spher = cartToSpher(scattering_dir_cart)
+                    if key in dict_state.keys():
+                        dict_state[key] = np.concatenate([ dict_state[key], np.array([[int(action_int),scattering_dir_spher.get_y(),scattering_dir_spher.get_z(), q_value]])])
+                    else:
+                        dict_state[key] = np.array([[int(action_int),scattering_dir_spher.get_y(),scattering_dir_spher.get_z(),q_value]])
+
 
         # Only if double action
         elif params['double_action']:
-            next_action_int, next_double_action_int, next_state_double_action = agent.do_action_double_action(next_state, hitobj, dict)
+            next_action_int, next_double_action_int, next_state_double_action = agent.do_action_double_action(next_state, hitobj, dict_act)
             if params['training']:
                 if depth > 1 and count < params['limit_training']:
                     agent.train_double_action(state_double_action, action_int, double_action_int, reward,
-                                              next_state_double_action, done, hitobj.get_BRDF(), dict, nl, params)
+                                              next_state_double_action, done, hitobj.get_BRDF(), dict_act, nl, params)
         if done:
             return L
         if not params['double_action']:
-            action_int = agent.do_action(next_state, hitobj, dict)
+            action_int = agent.do_action(next_state, hitobj, dict_act)
             F = F.mult(hitobj.get_c()) * hitobj.get_prob() * hitobj.get_BRDF() * hitobj.get_costheta()
-            ray = Ray(p, DQNScattering(dict, nl, action_int, 0).norm())
+            scattering_dir_cart = DQNScattering(dict_act, nl, action_int, 0).norm()
+            ray = Ray(p, scattering_dir_cart)
             state = copy.deepcopy(next_state)
+            p_old = p
+            nl_old = nl
+
         # Only if double action
         else:
             F = F.mult(hitobj.get_c()) * hitobj.get_prob() * hitobj.get_BRDF() * hitobj.get_costheta()
-            ray = Ray(p, DQNScattering(dict, nl, next_action_int, next_double_action_int).norm())
+            ray = Ray(p, DQNScattering(dict_act, nl, next_action_int, next_double_action_int).norm())
             state = copy.deepcopy(next_state)
             state_double_action = copy.deepcopy(next_state_double_action)
             double_action_int = copy.deepcopy(next_double_action_int)
@@ -109,7 +126,7 @@ def main(params):
         log_sphere_point = "sphere_point.csv"
     elif params['action_space'] == 72:
         log_sphere_point = "sphere_point4.csv"
-    dict = initialize_dictAction(log_sphere_point)
+    dict_act = initialize_dictAction(log_sphere_point)
 
     # Training
     if params['training']:
@@ -120,6 +137,7 @@ def main(params):
         Ls.fill(0)
         agent = DQN(params)
         counter_bounces = Counter()
+        dict_state = dict()
         i = 0
         for y in tqdm(range(params['h_training']), desc='Rendering ({0} spp), learning rate {1:11.8f}'.format(params['samples_training'],agent.learning_rate), position=0, leave=True):
             if i > params['limit_training']:
@@ -134,7 +152,7 @@ def main(params):
                     u = (x - 0.5 + random.random()) / params['w_training']
                     v = ((params['h_training'] - y - 1) - 0.5 + random.random()) / params['h_training']
                     d = cam.get_ray(u, v)
-                    rad = radiance(Ray(d.o, d.d.norm()), 0, dict, agent, i, counter_bounces, params)
+                    rad = radiance(Ray(d.o, d.d.norm()), 0, dict_act, agent, i, counter_bounces, params, dict_state)
                     L += rad * (1.0 / params['samples_training'])
                 Ls[i][0] = clamp(L.get_x())
                 Ls[i][1] = clamp(L.get_y())
@@ -153,6 +171,10 @@ def main(params):
                         agent.model_double_action.save_weights("weights\\" + params['weight_double_action'])
                     print("Weights saved...")
                     time.sleep(3)
+
+                    with open('dict_state.p', 'wb') as fp:
+                        pickle.dump(dict_state, fp, protocol=pickle.HIGHEST_PROTOCOL)
+
                     break
             #write_ppm(params['w_training'], params['h_training'], Ls, fname=img_title)
         #print("NUMBER OF BOUNCES: ", counter_bounces.full_count / (params['w_training'] * params['h_training'] * params['samples_training']))
@@ -170,6 +192,7 @@ def main(params):
         agent.exploration_rate = 0
         weights_path = 'weights\\' + params['weight']
         agent.model = agent.network(weights_path)
+        dict_state = dict()
         if params['double_action']:
             weights_path_double_action = 'weights\\' + params['weight_double_action']
             agent.model_double_action = agent.network_double_action(weights_path_double_action)
@@ -186,7 +209,7 @@ def main(params):
                     u = (x - 0.5 + random.random()) / params['w_test']
                     v = ((params['h_test'] - y - 1) - 0.5 + random.random()) / params['h_test']
                     d = cam.get_ray(u, v)
-                    rad = radiance(Ray(d.o, d.d.norm()), 0, dict, agent, i, counter_bounces, params)
+                    rad = radiance(Ray(d.o, d.d.norm()), 0, dict_act, agent, i, counter_bounces, params, dict_state)
                     L += rad * (1.0 / params['samples_test'])
                     Ls[i][0] = Ls[i][0] + clamp(L.get_x())
                     Ls[i][1] = Ls[i][1] + clamp(L.get_y())

@@ -3,9 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="245e8a6b-1a5b-437b-836d-045cc3259ad7" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DQNAgent_DDQN.py" beforeDir="false" afterPath="$PROJECT_DIR$/DQNAgent_DDQN.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bayesOpt.py" beforeDir="false" afterPath="$PROJECT_DIR$/bayesOpt.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/py_smallpt_newactions.py" beforeDir="false" afterPath="$PROJECT_DIR$/py_smallpt_newactions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pybind-modules/smallpt_pybind.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/pybind-modules/smallpt_pybind.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smallpt_pybind.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,43 +21,6 @@
         <option value="Python Script" />
       </list>
     </option>
-  </component>
-  <component name="FindInProjectRecents">
-    <findStrings>
-      <find>spher</find>
-      <find>epsilon</find>
-      <find>random</find>
-      <find>explo</find>
-      <find>do_ac</find>
-      <find>predi</find>
-      <find>array_c</find>
-      <find>merge</find>
-      <find>model_t</find>
-      <find>plot</find>
-      <find>32</find>
-      <find>do_act</find>
-      <find>train(</find>
-      <find>epsilon_decay</find>
-      <find>REFRACTIVE_INDEX_OUT</find>
-      <find>NUMBER_OBJ</find>
-      <find>epsil</find>
-      <find>epsilon_decay_linear</find>
-      <find>limit</find>
-      <find>kernel_size</find>
-      <find>state_space</find>
-      <find>action_space</find>
-      <find>learning</find>
-      <find>TOTAL_CYCLES</find>
-      <find>array_cos</find>
-      <find>gaussian_kernel</find>
-      <find>\</find>
-      <find>params['weight']</find>
-      <find>explora</find>
-      <find>Score:  0.08</find>
-    </findStrings>
-    <replaceStrings>
-      <replace>)</replace>
-    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -221,42 +187,46 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="739" y="274" key="FileChooserDialogImpl/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587142434717" />
-    <state width="1723" height="328" key="GridCell.Tab.0.bottom" timestamp="1587660737872">
+    <state width="1149" height="299" key="GridCell.Tab.0.bottom" timestamp="1587836874952">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1723" height="328" key="GridCell.Tab.0.bottom/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587660737872" />
-    <state width="1723" height="328" key="GridCell.Tab.0.center" timestamp="1587660737872">
+    <state width="1149" height="299" key="GridCell.Tab.0.bottom/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587836874952" />
+    <state width="1149" height="299" key="GridCell.Tab.0.center" timestamp="1587836874952">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1723" height="328" key="GridCell.Tab.0.center/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587660737872" />
-    <state width="1723" height="328" key="GridCell.Tab.0.left" timestamp="1587660737872">
+    <state width="1149" height="299" key="GridCell.Tab.0.center/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587836874952" />
+    <state width="1149" height="299" key="GridCell.Tab.0.left" timestamp="1587836874952">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1723" height="328" key="GridCell.Tab.0.left/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587660737872" />
-    <state width="1723" height="328" key="GridCell.Tab.0.right" timestamp="1587660737872">
+    <state width="1149" height="299" key="GridCell.Tab.0.left/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587836874952" />
+    <state width="1149" height="299" key="GridCell.Tab.0.right" timestamp="1587836874952">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1723" height="328" key="GridCell.Tab.0.right/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587660737872" />
-    <state width="1159" height="375" key="GridCell.Tab.1.bottom" timestamp="1587140651781">
+    <state width="1149" height="299" key="GridCell.Tab.0.right/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587836874952" />
+    <state width="1149" height="299" key="GridCell.Tab.1.bottom" timestamp="1587836860739">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1159" height="375" key="GridCell.Tab.1.bottom/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587140651781" />
-    <state width="1159" height="375" key="GridCell.Tab.1.center" timestamp="1587140651781">
+    <state width="1149" height="299" key="GridCell.Tab.1.bottom/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587836860739" />
+    <state width="1149" height="299" key="GridCell.Tab.1.center" timestamp="1587836860739">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1159" height="375" key="GridCell.Tab.1.center/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587140651781" />
-    <state width="1159" height="375" key="GridCell.Tab.1.left" timestamp="1587140651781">
+    <state width="1149" height="299" key="GridCell.Tab.1.center/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587836860739" />
+    <state width="1149" height="299" key="GridCell.Tab.1.left" timestamp="1587836860739">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1159" height="375" key="GridCell.Tab.1.left/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587140651781" />
-    <state width="1159" height="375" key="GridCell.Tab.1.right" timestamp="1587140651781">
+    <state width="1149" height="299" key="GridCell.Tab.1.left/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587836860739" />
+    <state width="1149" height="299" key="GridCell.Tab.1.right" timestamp="1587836860739">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1159" height="375" key="GridCell.Tab.1.right/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587140651781" />
+    <state width="1149" height="299" key="GridCell.Tab.1.right/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587836860739" />
     <state x="461" y="162" key="SettingsEditor" timestamp="1586025484528">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="461" y="162" key="SettingsEditor/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1586025484528" />
+    <state x="482" y="225" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1587816651967">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="482" y="225" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587816651967" />
     <state x="661" y="344" key="com.intellij.ide.util.TipDialog" timestamp="1587658429676">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -292,13 +262,23 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/DQNAgent_DDQN.py</url>
-          <line>289</line>
+          <line>290</line>
           <option name="timeStamp" value="20" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/DQNAgent_DDQN.py</url>
-          <line>250</line>
+          <line>251</line>
           <option name="timeStamp" value="23" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/py_smallpt_newactions.py</url>
+          <line>89</line>
+          <option name="timeStamp" value="29" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/DQNAgent_DDQN.py</url>
+          <line>224</line>
+          <option name="timeStamp" value="32" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

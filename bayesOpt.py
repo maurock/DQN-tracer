@@ -21,12 +21,12 @@ params['advantage_layer1'] = 600
 params['advantage_layer2'] = 700
 
 # Rendering
-params['w_training'] = 32
-params['h_training'] = 32
-params['w_test'] = 128
-params['h_test'] = 128
-params['samples_training'] = 2
-params['samples_test'] = 2
+params['w_training'] = 128
+params['h_training'] = 128
+params['w_test'] = 256
+params['h_test'] = 256
+params['samples_training'] = 8
+params['samples_test'] = 32
 
 # Options
 params['select_max_Q'] = True
@@ -35,14 +35,14 @@ params['scene'] = '3'
 params['num_object'] = 18 if (params['scene'] == '1' or params['scene'] == '2') else 19
 params['gaussian_kernel'] = True
 params['training'] = True
-params['test'] = True
+params['test'] = False
 params['limit_training'] = 500 #int(0.8*params['w_training']*params['h_training'])
 params['kernel_size'] = 16
 params['bayesOpt'] = False
 params['double_action'] = False
-
+params['discretize_state'] = False
 # Folders
-params['reference_path'] = 'images\\reference\\reference_scene3_128x128_5120spp.png'
+params['reference_path'] = 'images\\reference\\reference_scene3_256x256_5120spp.png'
 params['path_SSIM_total'] = 'logs\\SSIM_total_' + str(datetime.datetime.now().strftime("%Y%m%d%H%M%S")) +'.txt'
 
 
@@ -132,7 +132,7 @@ if __name__ == '__main__':
     if params['bayesOpt'] == False:
         # Set automatic parameters
         lr_string = '{:.8f}'.format(params["learning_rate"])[2:]
-        params['img_title'] = 'DDQN_scene{}_lr{}_struct{}-{}_{}-{}_{}-{}_eps{}_TEST'.format(params['scene'],
+        params['img_title'] = 'DDQN_scene{}_lr{}_struct{}-{}_{}-{}_{}-{}_eps{}_dictsstate'.format(params['scene'],
                                                                                         lr_string,
                                                                                         params['dense_layer12'],
                                                                                         params['dense_layer3'],
@@ -141,10 +141,10 @@ if __name__ == '__main__':
                                                                                         params['advantage_layer1'],
                                                                                         params['advantage_layer2'],
                                                                                         params['epsilon_decay_linear'])
-        #params['weight'] = 'weights_scene{}_'.format(params['scene']) + params['img_title'] + '.h5'
+        params['weight'] = 'weights_scene{}_'.format(params['scene']) + params['img_title'] + '.h5'
 
         # Custom weight
-        params['weight'] = 'weights_scene3_DDQN_scene3_best_test.h5'
+        params['weight'] = 'weights_scene3_DDQN_scene3_lr00000800_struct500-700_400-400_600-700_eps5000_new_conversion.h5'
         if params['double_action']:
             params['weight_double_action'] = 'weights_double_action_scene3_DDQN_scene3.h5'
         main(params)

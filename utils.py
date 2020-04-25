@@ -83,3 +83,9 @@ def create_log(params):
         file.write(json.dumps(params['img_title'])+'\n\n')
         for _ in (list(params.keys())):
             file.write(str(_) + " : " + json.dumps(params[_]) + "\n")
+
+
+
+
+
+

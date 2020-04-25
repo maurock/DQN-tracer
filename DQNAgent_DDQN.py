@@ -216,7 +216,7 @@ class DQN:
             if params['select_max_Q']:
                 action_int_q = np.argmax(prediction[0])
                 cos_theta_q = dict_act[action_int_q].get_z()
-                target = reward + np.amax(prediction[0]) * cos_theta_q * BRDF
+                target = reward + np.amax(prediction[0]) * cos_theta_q #* BRDF
             else:
                 # Average Q
                 cumulative_q_value = cumulative_q(dict_act, nl, prediction[0])
@@ -226,6 +226,7 @@ class DQN:
         target_f[0] = target_f[0].clip(min=0.1)
         target_f[0][action] = target
         self.model.fit(state.reshape(1, self.state_space), target_f, epochs=1, verbose=0)
+        return target
 
     # Train agent
     def train_double_action(self, state, action, action_double_action, reward, next_state, done, BRDF, dict_act, nl, params):

@@ -5,14 +5,9 @@
 #include "pybind11/stl.h"
 #include <map>
 #include <fstream>
+
 namespace py = pybind11;
-
-// Settings
 int action_space = 72;
-bool equally_sized_patches = false;
-bool not_equally_sized_patches = true;
-bool double_action_space = false; //based on not equally sized patches
-
 struct Vec {
 	float x, y, z;                  // position, also color (r,g,b)
 	Vec(float x_ = 0, float y_ = 0, float z_ = 0) {
@@ -257,7 +252,7 @@ public:
 	}
 
 	Vec normal(Ray r, Vec x) {
-		Vec n = (Vec(p1 - p2).cross(Vec(p1 - p3))).norm();
+		Vec& n = (Vec(p1 - p2).cross(Vec(p1 - p3))).norm();
 		return n.dot(r.d) < 0 ? n : n * -1;
 	}
 
@@ -270,7 +265,7 @@ public:
 	}
 };
 
-Hitable *scene[19] = {
+Hitable *scene[18] = {
 	new Rectangle_xy(1, 99, 0, 81.6, -25, Vec(),Vec(.75, .75, .75)), 				// Front2
 	new Rectangle_xy(1, 99, 0, 81.6, 0, Vec(),Vec(.75, .75, .75)), 					// Front
 	new Rectangle_xy(1, 99, 0, 81.6, 170, Vec(), Vec(.75, .75, .75)),				// Back
@@ -279,8 +274,8 @@ Hitable *scene[19] = {
 	new Rectangle_xz(1, 99, 0, 170, 0, Vec(), Vec(.75, .75, .75)),					// Bottom
 	new Rectangle_xz(1, 99, 0, 170, 81.6, Vec(), Vec(.75, .75, .75)),				// Top
 	//new Rectangle_xz(32, 68, 63, 96, 81.595, Vec(12, 12, 12), Vec()),				// Light 1
-	//new Rectangle_xz(88, 99, 63, 88, 0.01, Vec(12, 12, 12), Vec()),				// Light 2
-	new Rectangle_yz(0, 60, 62, 90, 1.01, Vec(12,12,12), Vec()),					// Light 3
+	new Rectangle_xz(88, 99, 63, 88, 0.01, Vec(12, 12, 12), Vec()),				// Light 2
+	//new Rectangle_yz(0, 60, 62, 90, 1.01, Vec(12,12,12), Vec()),					// Light 3
 
 	new Rectangle_xy(12, 42, 0, 50, 32, Vec(), Vec(.95,.95,.95)),					// Tall box
 	new Rectangle_xy(12, 42, 0, 50, 62, Vec(), Vec(.95,.95,.95)),
@@ -292,9 +287,9 @@ Hitable *scene[19] = {
 	new Rectangle_xy(63, 88, 0, 25, 88, Vec(), Vec(.95,.95,.95)),
 	new Rectangle_yz(0, 25, 63, 88, 63, Vec(), Vec(.95,.95,.95)),
 	new Rectangle_yz(0, 25, 63, 88, 88, Vec(), Vec(.95,.95,.95)),
-	new Rectangle_xz(63, 88, 63, 88, 25, Vec(), Vec(.95,.95,.95)),
+	new Rectangle_xz(63, 88, 63, 88, 25, Vec(), Vec(.95,.95,.95))
 
-	new Rectangle_tilted(Vec(1.1,0,60),Vec(10,0,100),Vec(1,60,60),Vec(), Vec(.75, .25, .25))		// Tilted plane
+	//new Rectangle_tilted(Vec(1.1,0,60),Vec(10,0,100),Vec(1,60,60),Vec(), Vec(.75, .25, .25))		// Tilted plane
 };
 
 class Camera {
@@ -448,19 +443,12 @@ Vec hittingPoint(Ray r, Hit_record& hit_rec, int N_OBJ) {
 }
 
 Vec spherToCart(Vec& spher) {
-	//return Vec(sin(spher.y)*sin(spher.z), sin(spher.y)*cos(spher.z), cos(spher.y));
-	return Vec(sin(spher.y)*sin(spher.z), cos(spher.y), sin(spher.y)*cos(spher.z));
+	return Vec(sin(spher.y)*sin(spher.z), sin(spher.y)*cos(spher.z), cos(spher.y));
 }
 
 // convert Cartesian coordinates into spherical
 Vec cartToSpher(Vec& cart) {
-	//return Vec(1, atan((sqrt(cart.x*cart.x + cart.y*cart.y)) / cart.z), atan2(cart.x, cart.y));     // (radius, theta (vertical), phi (orizontal))
-	//py::print("cart.x", cart.x); 
-	//py::print("cart.y", cart.y);
-	//py::print("cart.z", cart.z);
-	//py::print("y, theta", atan2((sqrt(cart.x*cart.x + cart.z*cart.z)), cart.y));
-	//py::print("z, phi", atan2(cart.x, cart.z)); 
-	return Vec(1, atan2((sqrt(cart.x*cart.x + cart.z*cart.z)) , cart.y), atan2(cart.x,cart.z));     // (radius, theta (vertical), phi (orizontal))
+	return Vec(1, atan((sqrt(cart.x*cart.x + cart.y*cart.y)) / cart.z), atan2(cart.x, cart.y));
 }
 
 std::map<Action, Direction> initialize_dictAction(std::string s) {
@@ -487,41 +475,11 @@ Vec getTangent(Vec& normal) {
 	return (normal.cross(new_vector.norm()));
 }
 
-// Get the patch height for double action space, action space = 72
-float getHeight(int action) {
-	if (action >= 60) {
-		return 0.408248;
-	}
-	else if (action >= 48 && action < 60) {
-		return 0.16915;
-	}
-	else if (action >= 36 && action < 48) {
-		return 0.12975;
-	}
-	else if (action >= 24 && action < 36) {
-		return 0.1094;
-	}
-	else if (action >= 12 && action < 24) {
-		return 0.0964;
-	}
-	else if (action < 12) {
-		return 0.08713;
-	}
-}
-
-// Get row and column index from action index
-int* getRowColumn(int subaction) {
-	static int x[2];
-	x[0] = floor((float)subaction / 4);
-	x[1] = subaction % 4;
-	return x;
-}
-
-Vec DQNScattering(std::map<Action, Direction> *dictAction, Vec &nl, int& action, int double_action) {
+Vec DQNScattering(std::map<Action, Direction> *dictAction, Vec &nl, int& action) {
 	std::map<Action, Direction> &addrDictAction = *dictAction;
 	
 	// Create temporary coordinates system
-	Vec w = nl.norm();
+	Vec& w = nl.norm();
 	const Vec& u = getTangent(w).norm();
 	const Vec& v = (w.cross(u)).norm();
 
@@ -547,8 +505,8 @@ Vec DQNScattering(std::map<Action, Direction> *dictAction, Vec &nl, int& action,
 		}
 	}	   	 
 
-	// Action = 72, Original action space (equally sized patches)
-	if (action_space == 72 && equally_sized_patches) {
+	// Action = 72
+	if (action_space == 72) {
 		spher_coord.z = (0.523*(rand() / float(RAND_MAX)) - 0.261) + spher_coord.z;		// Action 72
 		if (point_old_coord.z < 0.167) {
 			spher_coord.y = 0.16*(rand() / float(RAND_MAX)) + 1.40;		// math done on the notes: theta - 0.168 < theta < theta - 0.168
@@ -569,67 +527,9 @@ Vec DQNScattering(std::map<Action, Direction> *dictAction, Vec &nl, int& action,
 			spher_coord.y = 0.523*(rand() / float(RAND_MAX));
 		}
 	}
-	// Action = 72, New action space (not-equally sized patches)
-	else if (action_space == 72 && not_equally_sized_patches) {
-		spher_coord.z = (0.523*(rand() / float(RAND_MAX)) - 0.261) + spher_coord.z;		// Action 72
-		if (point_old_coord.z < 0.408) {
-			spher_coord.y = 0.42*(rand() / float(RAND_MAX)) + 1.15;    // math done on the notes: theta - 0.168 < theta < theta - 0.168
-		}
-		else if (point_old_coord.z >= 0.408 && point_old_coord.z < 0.577) {
-			spher_coord.y = 0.195*(rand() / float(RAND_MAX)) + 0.955;		// theta - 0.192 < theta < theta - 0.192
-		}
-		else if (point_old_coord.z >= 0.577 && point_old_coord.z < 0.707) {
-			spher_coord.y = 0.170*(rand() / float(RAND_MAX)) + 0.785;		// theta - 0.192 < theta < theta - 0.192
-		}
-		else if (point_old_coord.z >= 0.707 && point_old_coord.z < 0.816) {
-			spher_coord.y = 0.170*(rand() / float(RAND_MAX)) + 0.615;		// theta - 0.192 < theta < theta - 0.192
-		}
-		else if (point_old_coord.z >= 0.816 && point_old_coord.z < 0.913) {
-			spher_coord.y = 0.195*(rand() / float(RAND_MAX)) + 0.420;		// theta - 0.192 < theta < theta - 0.192
-		}
-		else {
-			spher_coord.y = 0.42*(rand() / float(RAND_MAX));
-		}
-	}
-	// Action = 72, Double Action depth
-	else if (action_space == 72 && double_action_space) {
-		int* x = getRowColumn(double_action);
-
-		float w = 0.523;
-		float h = getHeight(action);
-		float w_4 = w / 4;
-
-		float A = acos(std::max((point_old_coord.z - h / 2), (float)0));
-		float B = acos(std::max((point_old_coord.z - h / 6), (float)0));
-		float C = acos(std::min((point_old_coord.z + h / 6), (float)1));
-		float D = acos(std::min((point_old_coord.z + h / 2), (float)1));
-
-		if (x[0] == 0) {
-			spher_coord.y = B + (rand() / float(RAND_MAX))*(A - B);
-		}
-		else if (x[0] == 1) {
-			spher_coord.y = C + (rand() / float(RAND_MAX))*(B - C);
-		}
-		else if (x[0] == 2) {
-			spher_coord.y = D + (rand() / float(RAND_MAX))*(C - D);
-		}
-		if (x[1] == 0) {
-			spher_coord.z = (spher_coord.z - w / 2) + (rand() / float(RAND_MAX)) * w_4;
-		}
-		else if (x[1] == 1) {
-			spher_coord.z = (spher_coord.z - w_4) + (rand() / float(RAND_MAX)) * w_4;
-		}
-		else if (x[1] == 2) {
-			spher_coord.z = spher_coord.z + (rand() / float(RAND_MAX)) * w_4;
-		}
-		else if (x[1] == 3) {
-			spher_coord.z = (spher_coord.z + w_4) + (rand() / float(RAND_MAX)) * w_4;
-		}
-	}
 
 	point_old_coord = spherToCart(spher_coord);
-	//return (u*point_old_coord.x + v * point_old_coord.y + w * point_old_coord.z); // new_point.x * u + new_point.y * v + new_point.z * w + hitting_point
-	return (v*point_old_coord.x + w * point_old_coord.y + u * point_old_coord.z); // new_point.x * u + new_point.y * v + new_point.z * w + hitting_point
+	return (u*point_old_coord.x + v * point_old_coord.y + w * point_old_coord.z); // new_point.x * u + new_point.y * v + new_point.z * w + hitting_point
 }
 
 int get_proportional_action(py::array_t<float> array_prob, int size_arr){
@@ -661,7 +561,7 @@ float cumulative_q(std::map<Action, Direction> *dictAction, Vec &nl, py::array_t
 	float *ptr1 = (float *)buf1.ptr;
 
 	// Create temporary coordinates system
-	Vec w = nl.norm();
+	Vec& w = nl.norm();
 	const Vec& u = getTangent(w).norm();
 	const Vec& v = (w.cross(u)).norm();
 
@@ -799,7 +699,6 @@ PYBIND11_MODULE(smallpt_pybind, m) {
 	m.def("DQNScattering", &DQNScattering);
 	m.def("get_proportional_action", &get_proportional_action);
 	m.def("cumulative_q", &cumulative_q);
-	m.def("getHeight", &getHeight);
-	m.def("getRowColumn", &getRowColumn);
+	
 
 }
