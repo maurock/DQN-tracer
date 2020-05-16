@@ -54,6 +54,7 @@ class DQN:
         self.state_space_double_action = 52
         self.action_space_double_action = 12
         self.model_double_action = self.network_double_action()
+        self.table = dict()
 
 
     # Defining DDQN.
@@ -204,8 +205,45 @@ class DQN:
         hitobj.set_costheta(dict_act[idx_action].get_z())
         return idx_action, double_action_idx, state_double_action
 
+    # Predict action based on current state
+    def do_action_Q(self, state, hitobj, dict_act, dict_state_action_visit):
+        if np.random.rand() <= self.exploration_rate:
+            action_idx = np.random.randint(0, self.action_space)
+            hitobj.set_prob(1)  # microptimization
+            hitobj.set_BRDF(1)  # microptimization
+            hitobj.set_costheta(1)
+            key_state_action_visit = state + (action_idx,)
+            if key_state_action_visit not in dict_state_action_visit:
+                dict_state_action_visit[key_state_action_visit] = 1
+            else:
+                dict_state_action_visit[key_state_action_visit] += 1
+            return action_idx, dict_state_action_visit
+        idx_action = get_proportional_action(self.table[state][:72], len(self.table[state][:72]))
+        if (idx_action < 12):
+            prob_patch = 0.045620675
+        elif (idx_action >= 12 and idx_action < 24):
+            prob_patch = 0.050461491
+        elif (idx_action >= 24 and idx_action < 36):
+            prob_patch = 0.057276365
+        elif (idx_action >= 36 and idx_action < 48):
+            prob_patch = 0.067940351
+        elif (idx_action >= 48 and idx_action < 60):
+            prob_patch = 0.088541589
+        else:
+            prob_patch = 0.213758305
+        hitobj.set_prob((self.table[state][72] * prob_patch) / (self.table[state][idx_action]))  # prob of getting the hights value (1) times prob scattering to a specific direction inside the action patch
+        hitobj.set_BRDF(1 / math.pi)
+        hitobj.set_costheta(dict_act[idx_action].get_z())
+
+        key_state_action_visit = state + (idx_action,)
+        if key_state_action_visit not in dict_state_action_visit:
+            dict_state_action_visit[key_state_action_visit] = 1
+        else:
+            dict_state_action_visit[key_state_action_visit] += 1
+        return idx_action, dict_state_action_visit
+
     # Train agent
-    def train(self, state, action, reward, next_state, done, BRDF, dict_act, nl, params):
+    def train_DQN(self, state, action, reward, next_state, done, BRDF, dict_act, nl, params):
         if done == 1:
             target = reward
         else:
@@ -227,6 +265,35 @@ class DQN:
         target_f[0][action] = target
         self.model.fit(state.reshape(1, self.state_space), target_f, epochs=1, verbose=0)
         return target
+
+    def train_Q(self, state, action, reward, next_state, done, BRDF, dict_act, nl, params, dict_state_action_visit):
+        key_state_action_visit = state + (action,)
+        lr = 1 / (float(dict_state_action_visit[key_state_action_visit]))
+        if done == 1:
+            update = self.table[state][action] * (1 - lr) + lr * reward
+        else:
+            cumulative_q = 0
+            for i in range(72):
+                if i < 12:
+                    prob_cumulative_q = 0.0871/12
+                elif i >= 12 and i < 24:
+                    prob_cumulative_q = 0.0964/12
+                elif i >= 24 and i < 36:
+                    prob_cumulative_q = 0.1093/12
+                elif i >= 36 and i < 48:
+                    prob_cumulative_q = 0.1297/12
+                elif i >= 48 and i < 60:
+                    prob_cumulative_q = 0.1691/12
+                else:
+                    prob_cumulative_q = 0.408/12
+                cumulative_q += (self.table[next_state][i] * dict_act[i].get_z()) * prob_cumulative_q
+            update = self.table[state][action] * (1 - lr) + lr * cumulative_q * BRDF
+        self.table[state][action] = update
+        total = 0
+        for s in range(72):
+            total += self.table[state][s]
+        self.table[state][72] = total
+        return update
 
     # Train agent
     def train_double_action(self, state, action, action_double_action, reward, next_state, done, BRDF, dict_act, nl, params):

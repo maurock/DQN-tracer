@@ -11,7 +11,7 @@ params = dict()
 # Neural network
 params['state_space'] = 51
 params['action_space'] = 72
-params['epsilon_decay_linear'] = 5000
+params['epsilon_decay_linear'] = 7500
 params['learning_rate'] = 0.000008
 params['dense_layer12'] = 500
 params['dense_layer3'] = 700
@@ -26,7 +26,7 @@ params['h_training'] = 128
 params['w_test'] = 256
 params['h_test'] = 256
 params['samples_training'] = 8
-params['samples_test'] = 32
+params['samples_test'] = 36
 
 # Options
 params['select_max_Q'] = True
@@ -35,12 +35,14 @@ params['scene'] = '3'
 params['num_object'] = 18 if (params['scene'] == '1' or params['scene'] == '2') else 19
 params['gaussian_kernel'] = True
 params['training'] = True
-params['test'] = False
-params['limit_training'] = 500 #int(0.8*params['w_training']*params['h_training'])
+params['test'] = True
+params['limit_training'] = 16300 #int(0.8*params['w_training']*params['h_training'])
 params['kernel_size'] = 16
 params['bayesOpt'] = False
 params['double_action'] = False
+params['Q_Learning'] = True
 params['discretize_state'] = False
+
 # Folders
 params['reference_path'] = 'images\\reference\\reference_scene3_256x256_5120spp.png'
 params['path_SSIM_total'] = 'logs\\SSIM_total_' + str(datetime.datetime.now().strftime("%Y%m%d%H%M%S")) +'.txt'
@@ -132,7 +134,7 @@ if __name__ == '__main__':
     if params['bayesOpt'] == False:
         # Set automatic parameters
         lr_string = '{:.8f}'.format(params["learning_rate"])[2:]
-        params['img_title'] = 'DDQN_scene{}_lr{}_struct{}-{}_{}-{}_{}-{}_eps{}_dictsstate'.format(params['scene'],
+        params['img_title'] = 'DDQN_scene{}_lr{}_struct{}-{}_{}-{}_{}-{}_eps{}_QLEARNING_prob'.format(params['scene'],
                                                                                         lr_string,
                                                                                         params['dense_layer12'],
                                                                                         params['dense_layer3'],
@@ -144,7 +146,7 @@ if __name__ == '__main__':
         params['weight'] = 'weights_scene{}_'.format(params['scene']) + params['img_title'] + '.h5'
 
         # Custom weight
-        params['weight'] = 'weights_scene3_DDQN_scene3_lr00000800_struct500-700_400-400_600-700_eps5000_new_conversion.h5'
+        params['weight'] = 'weights_scene3_DDQN_scene3_Q_prob.h5'
         if params['double_action']:
             params['weight_double_action'] = 'weights_double_action_scene3_DDQN_scene3.h5'
         main(params)

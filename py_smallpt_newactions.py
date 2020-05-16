@@ -26,7 +26,7 @@ def score(final_image, reference_image_path, params, s):
         file.write("SSIM score (" + str(s) + " episode) : " + str(ssim) + "\n")
     return ssim
 
-def radiance(ray, depth, dict_act, agent, count, counter_bouncer, params, dict_state):
+def radiance(ray, depth, dict_act, agent, count, counter_bouncer, params, dict_state, dict_state_action_visit):
     L = Vec()
     F = Vec(1.0, 1.0, 1.0)
     hitobj = Hit_record()
@@ -42,6 +42,7 @@ def radiance(ray, depth, dict_act, agent, count, counter_bouncer, params, dict_s
             print("HAPPENED")
             return Vec()
         counter_bouncer.full_count += 1
+
         if depth > 5 and hitobj.get_e().get_x() < 1:
             continue_probability = F.get_max()
             if random.random() >= continue_probability:
@@ -63,24 +64,38 @@ def radiance(ray, depth, dict_act, agent, count, counter_bouncer, params, dict_s
         if hitobj.get_e().get_x() > 5:
             done = 1
 
-        if params['gaussian_kernel'] == True:
-            # Gaussian kernel
-            arr_line = np.linspace(0, 1, params['kernel_size'])
-            gaussiana_x = gaussian(arr_line, p.get_x() / 99, 1 / params['kernel_size'])
-            gaussiana_x[np.abs(gaussiana_x) < 0.01] = 0
-            gaussiana_y = gaussian(arr_line, p.get_y() / 82, 1 / params['kernel_size'])
-            gaussiana_y[np.abs(gaussiana_y) < 0.01] = 0
-            gaussiana_z = gaussian(arr_line, p.get_z() / 170, 1 / params['kernel_size'])
-            gaussiana_z[np.abs(gaussiana_z) < 0.01] = 0
-            next_state = np.concatenate((gaussiana_x, gaussiana_y, gaussiana_z, np.array([nl.get_x(), nl.get_y(), nl.get_z()])), axis=0)
+        if not params["Q_Learning"]:
+            if params['gaussian_kernel']:
+                # Gaussian kernel
+                arr_line = np.linspace(0, 1, params['kernel_size'])
+                gaussiana_x = gaussian(arr_line, p.get_x() / 99, 1 / params['kernel_size'])
+                gaussiana_x[np.abs(gaussiana_x) < 0.01] = 0
+                gaussiana_y = gaussian(arr_line, p.get_y() / 82, 1 / params['kernel_size'])
+                gaussiana_y[np.abs(gaussiana_y) < 0.01] = 0
+                gaussiana_z = gaussian(arr_line, p.get_z() / 170, 1 / params['kernel_size'])
+                gaussiana_z[np.abs(gaussiana_z) < 0.01] = 0
+                next_state = np.concatenate((gaussiana_x, gaussiana_y, gaussiana_z, np.array([nl.get_x(), nl.get_y(), nl.get_z()])), axis=0)
+            else:
+                # Not Gaussian kernel
+                next_state = np.array([p.get_x(), p.get_y(), p.get_z(), nl.get_x(), nl.get_y(), nl.get_z()])
         else:
-            # Not Gaussian kernel
-            next_state = np.array([p.get_x(), p.get_y(), p.get_z(), nl.get_x(), nl.get_y(), nl.get_z()])
+            next_state = (math.ceil(p.get_x() / 5), math.ceil(p.get_y() / 5), math.ceil(p.get_z() / 5),
+                                nl.get_x(), nl.get_y(), nl.get_z())
+            if next_state not in agent.table.keys():
+                agent.table[next_state] = np.zeros(73)
+                total = 0
+                for i in range(72):
+                    value = dict_act[i].get_z()
+                    agent.table[next_state][i] = value
+                    total += value
+                agent.table[next_state][72]=total
 
         if params['training'] and not params['double_action']:
             if depth > 1 and count < params['limit_training']:
-                q_value = agent.train(state, action_int, reward, next_state, done, hitobj.get_BRDF(), dict_act, nl, params)
-
+                if not params['Q_Learning']:
+                    q_value = agent.train_DQN(state, action_int, reward, next_state, done, hitobj.get_BRDF(), dict_act, nl, params)
+                else:
+                    q_value = agent.train_Q(state, action_int, reward, next_state, done, hitobj.get_BRDF(), dict_act,nl, params,dict_state_action_visit)
                 if params['discretize_state']:
                     # Discretize state
                     key = (math.ceil(p_old.get_x() / 5), math.ceil(p_old.get_y() / 5), math.ceil(p_old.get_z() / 5),
@@ -102,7 +117,10 @@ def radiance(ray, depth, dict_act, agent, count, counter_bouncer, params, dict_s
         if done:
             return L
         if not params['double_action']:
-            action_int = agent.do_action(next_state, hitobj, dict_act)
+            if not params['Q_Learning']:
+                action_int = agent.do_action(next_state, hitobj, dict_act)
+            else:
+                action_int, dict_state_action_visit = agent.do_action_Q(next_state, hitobj, dict_act, dict_state_action_visit)
             F = F.mult(hitobj.get_c()) * hitobj.get_prob() * hitobj.get_BRDF() * hitobj.get_costheta()
             scattering_dir_cart = DQNScattering(dict_act, nl, action_int, 0).norm()
             ray = Ray(p, scattering_dir_cart)
@@ -138,6 +156,7 @@ def main(params):
         agent = DQN(params)
         counter_bounces = Counter()
         dict_state = dict()
+        dict_state_action_visit = dict()
         i = 0
         for y in tqdm(range(params['h_training']), desc='Rendering ({0} spp), learning rate {1:11.8f}'.format(params['samples_training'],agent.learning_rate), position=0, leave=True):
             if i > params['limit_training']:
@@ -152,7 +171,7 @@ def main(params):
                     u = (x - 0.5 + random.random()) / params['w_training']
                     v = ((params['h_training'] - y - 1) - 0.5 + random.random()) / params['h_training']
                     d = cam.get_ray(u, v)
-                    rad = radiance(Ray(d.o, d.d.norm()), 0, dict_act, agent, i, counter_bounces, params, dict_state)
+                    rad = radiance(Ray(d.o, d.d.norm()), 0, dict_act, agent, i, counter_bounces, params, dict_state, dict_state_action_visit)
                     L += rad * (1.0 / params['samples_training'])
                 Ls[i][0] = clamp(L.get_x())
                 Ls[i][1] = clamp(L.get_y())
@@ -165,9 +184,13 @@ def main(params):
                     if agent.exploration_rate > agent.epsilon_min:
                         agent.exploration_rate = 1 - 1/agent.epsilon_decay_linear * i
                 if i > params['limit_training']:
-                    print("params[weight : ",params['weight'] )
-                    agent.model.save_weights("weights\\" + params['weight'])
-                    if params['double_action']:
+                    if not params['Q_Learning'] and not params['double_action']:
+                        print("params[weight : ",params['weight'] )
+                        agent.model.save_weights("weights\\" + params['weight'])
+                    elif not params['double_action']:
+                        with open('Q_learning_table_prob.p', 'wb') as fp:
+                            pickle.dump(agent.table, fp, protocol=pickle.HIGHEST_PROTOCOL)
+                    else:
                         agent.model_double_action.save_weights("weights\\" + params['weight_double_action'])
                     print("Weights saved...")
                     time.sleep(3)
@@ -190,9 +213,14 @@ def main(params):
         agent = DQN(params)
         counter_bounces = Counter()
         agent.exploration_rate = 0
-        weights_path = 'weights\\' + params['weight']
-        agent.model = agent.network(weights_path)
+        if params['Q_Learning']:
+            with open('Q_learning_table_prob.p', 'rb') as fp:
+                agent.table = pickle.load(fp)
+        else:
+            weights_path = 'weights\\' + params['weight']
+            agent.model = agent.network(weights_path)
         dict_state = dict()
+        dict_state_action_visit = dict()
         if params['double_action']:
             weights_path_double_action = 'weights\\' + params['weight_double_action']
             agent.model_double_action = agent.network_double_action(weights_path_double_action)
@@ -209,7 +237,7 @@ def main(params):
                     u = (x - 0.5 + random.random()) / params['w_test']
                     v = ((params['h_test'] - y - 1) - 0.5 + random.random()) / params['h_test']
                     d = cam.get_ray(u, v)
-                    rad = radiance(Ray(d.o, d.d.norm()), 0, dict_act, agent, i, counter_bounces, params, dict_state)
+                    rad = radiance(Ray(d.o, d.d.norm()), 0, dict_act, agent, i, counter_bounces, params, dict_state, dict_state_action_visit)
                     L += rad * (1.0 / params['samples_test'])
                     Ls[i][0] = Ls[i][0] + clamp(L.get_x())
                     Ls[i][1] = Ls[i][1] + clamp(L.get_y())

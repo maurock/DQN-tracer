@@ -448,8 +448,8 @@ Vec hittingPoint(Ray r, Hit_record& hit_rec, int N_OBJ) {
 }
 
 Vec spherToCart(Vec& spher) {
-	//return Vec(sin(spher.y)*sin(spher.z), sin(spher.y)*cos(spher.z), cos(spher.y));
-	return Vec(sin(spher.y)*sin(spher.z), cos(spher.y), sin(spher.y)*cos(spher.z));
+	return Vec(sin(spher.y)*sin(spher.z), sin(spher.y)*cos(spher.z), cos(spher.y));
+	//return Vec(sin(spher.y)*sin(spher.z), cos(spher.y), sin(spher.y)*cos(spher.z));
 }
 
 // convert Cartesian coordinates into spherical
@@ -460,7 +460,8 @@ Vec cartToSpher(Vec& cart) {
 	//py::print("cart.z", cart.z);
 	//py::print("y, theta", atan2((sqrt(cart.x*cart.x + cart.z*cart.z)), cart.y));
 	//py::print("z, phi", atan2(cart.x, cart.z)); 
-	return Vec(1, atan2((sqrt(cart.x*cart.x + cart.z*cart.z)) , cart.y), atan2(cart.x,cart.z));     // (radius, theta (vertical), phi (orizontal))
+	//return Vec(1, atan2((sqrt(cart.x*cart.x + cart.z*cart.z)) , cart.y), atan2(cart.x,cart.z));     // (radius, theta (vertical), phi (orizontal))
+	return Vec(1, atan((sqrt(cart.x*cart.x + cart.y*cart.y)) / cart.z), atan2(cart.x, cart.y));
 }
 
 std::map<Action, Direction> initialize_dictAction(std::string s) {
@@ -533,7 +534,7 @@ Vec DQNScattering(std::map<Action, Direction> *dictAction, Vec &nl, int& action,
 	// Scatter random inside the selected patch, convert to spherical coordinates for semplicity and then back to cartesian
 	Vec spher_coord = cartToSpher(point_old_coord);
 
-	// Action = 24
+	// Action = 24ti
 	if (action_space == 24) {
 		spher_coord.z = (0.78539*(rand() / float(RAND_MAX)) - 0.39269) + spher_coord.z;		// add or subtract randomly range {-22.5, 22.5} degrees to phi, in radian
 		if (point_old_coord.z < 0.33) {
@@ -628,8 +629,8 @@ Vec DQNScattering(std::map<Action, Direction> *dictAction, Vec &nl, int& action,
 	}
 
 	point_old_coord = spherToCart(spher_coord);
-	//return (u*point_old_coord.x + v * point_old_coord.y + w * point_old_coord.z); // new_point.x * u + new_point.y * v + new_point.z * w + hitting_point
-	return (v*point_old_coord.x + w * point_old_coord.y + u * point_old_coord.z); // new_point.x * u + new_point.y * v + new_point.z * w + hitting_point
+	return (u*point_old_coord.x + v * point_old_coord.y + w * point_old_coord.z); // new_point.x * u + new_point.y * v + new_point.z * w + hitting_point
+	//return (v*point_old_coord.x + w * point_old_coord.y + u * point_old_coord.z); // new_point.x * u + new_point.y * v + new_point.z * w + hitting_point
 }
 
 int get_proportional_action(py::array_t<float> array_prob, int size_arr){
