@@ -43,11 +43,8 @@ def radiance(ray, depth, dict_act, agent, count, counter_bouncer, params, dict_s
             return Vec()
         counter_bouncer.full_count += 1
 
-        if depth > 5 and hitobj.get_e().get_x() < 1:
-            continue_probability = F.get_max()
-            if random.random() >= continue_probability:
-                return L
-            F = F * (1 / continue_probability)
+        if depth >= 10 and hitobj.get_e().get_x() < 1:
+            return L
         depth += 1
 
         reward = hitobj.get_e().get_x()
@@ -55,9 +52,7 @@ def radiance(ray, depth, dict_act, agent, count, counter_bouncer, params, dict_s
         hitobj.set_hit(False)
 
         L = L + (F.mult(hitobj.get_e()))
-
         nl = hitobj.get_nl()
-
         hitobj.set_BRDF((hitobj.get_c().get_max()) / math.pi)
 
         # hitobj.set_costheta(math.fabs(nl.dot(ray.d)))
@@ -90,7 +85,7 @@ def radiance(ray, depth, dict_act, agent, count, counter_bouncer, params, dict_s
                     total += value
                 agent.table[next_state][72]=total
 
-        if params['training'] and not params['double_action']:
+        if params['training']:
             if depth > 1 and count < params['limit_training']:
                 if not params['Q_Learning']:
                     q_value = agent.train_DQN(state, action_int, reward, next_state, done, hitobj.get_BRDF(), dict_act, nl, params)
@@ -105,37 +100,19 @@ def radiance(ray, depth, dict_act, agent, count, counter_bouncer, params, dict_s
                         dict_state[key] = np.concatenate([ dict_state[key], np.array([[int(action_int),scattering_dir_spher.get_y(),scattering_dir_spher.get_z(), q_value]])])
                     else:
                         dict_state[key] = np.array([[int(action_int),scattering_dir_spher.get_y(),scattering_dir_spher.get_z(),q_value]])
-
-
-        # Only if double action
-        elif params['double_action']:
-            next_action_int, next_double_action_int, next_state_double_action = agent.do_action_double_action(next_state, hitobj, dict_act)
-            if params['training']:
-                if depth > 1 and count < params['limit_training']:
-                    agent.train_double_action(state_double_action, action_int, double_action_int, reward,
-                                              next_state_double_action, done, hitobj.get_BRDF(), dict_act, nl, params)
-        if done:
+        if done==1:
             return L
-        if not params['double_action']:
-            if not params['Q_Learning']:
-                action_int = agent.do_action(next_state, hitobj, dict_act)
-            else:
-                action_int, dict_state_action_visit = agent.do_action_Q(next_state, hitobj, dict_act, dict_state_action_visit)
-            F = F.mult(hitobj.get_c()) * hitobj.get_prob() * hitobj.get_BRDF() * hitobj.get_costheta()
-            scattering_dir_cart = DQNScattering(dict_act, nl, action_int, 0).norm()
-            ray = Ray(p, scattering_dir_cart)
-            state = copy.deepcopy(next_state)
-            p_old = p
-            nl_old = nl
-
-        # Only if double action
+        if not params['Q_Learning']:
+            action_int = agent.do_action(next_state, hitobj, dict_act)
         else:
-            F = F.mult(hitobj.get_c()) * hitobj.get_prob() * hitobj.get_BRDF() * hitobj.get_costheta()
-            ray = Ray(p, DQNScattering(dict_act, nl, next_action_int, next_double_action_int).norm())
-            state = copy.deepcopy(next_state)
-            state_double_action = copy.deepcopy(next_state_double_action)
-            double_action_int = copy.deepcopy(next_double_action_int)
-            action_int = copy.deepcopy(next_action_int)
+            action_int, dict_state_action_visit = agent.do_action_Q(next_state, hitobj, dict_act, dict_state_action_visit, params)
+        hitobj.set_BRDF(1 / math.pi)
+        F = F.mult(hitobj.get_c()) * hitobj.get_prob() * hitobj.get_BRDF() * hitobj.get_costheta()
+        scattering_dir_cart = DQNScattering(dict_act, nl, action_int, 0).norm()
+        ray = Ray(p, scattering_dir_cart)
+        state = copy.deepcopy(next_state)
+        p_old = p
+        nl_old = nl
 
 def main(params):
     # Save params
@@ -184,14 +161,12 @@ def main(params):
                     if agent.exploration_rate > agent.epsilon_min:
                         agent.exploration_rate = 1 - 1/agent.epsilon_decay_linear * i
                 if i > params['limit_training']:
-                    if not params['Q_Learning'] and not params['double_action']:
+                    if not params['Q_Learning']:
                         print("params[weight : ",params['weight'] )
                         agent.model.save_weights("weights\\" + params['weight'])
-                    elif not params['double_action']:
+                    else:
                         with open('Q_learning_table_prob.p', 'wb') as fp:
                             pickle.dump(agent.table, fp, protocol=pickle.HIGHEST_PROTOCOL)
-                    else:
-                        agent.model_double_action.save_weights("weights\\" + params['weight_double_action'])
                     print("Weights saved...")
                     time.sleep(3)
 
@@ -221,9 +196,6 @@ def main(params):
             agent.model = agent.network(weights_path)
         dict_state = dict()
         dict_state_action_visit = dict()
-        if params['double_action']:
-            weights_path_double_action = 'weights\\' + params['weight_double_action']
-            agent.model_double_action = agent.network_double_action(weights_path_double_action)
         agent.exploration_rate = 0
         print('\rRendering ({0} spp)'.format(params['samples_training']))
         for s in range(0, params['samples_test']):
