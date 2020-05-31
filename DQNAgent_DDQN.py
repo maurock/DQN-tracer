@@ -76,7 +76,6 @@ class DQN:
         action_advantage = Dense(self.action_space)(xa)
         action_advantage = Lambda(lambda a: a[:, :] - K.mean(a[:, :], keepdims=True), output_shape=(self.action_space,))(action_advantage)
 
-
         X = Add()([state_value, action_advantage])
         model = Model(input=input_layer, output=X)
         opt = Adam(self.learning_rate)
@@ -206,11 +205,11 @@ class DQN:
         return idx_action, double_action_idx, state_double_action
 
     # Predict action based on current state
-    def do_action_Q(self, state, hitobj, dict_act, dict_state_action_visit):
+    def do_action_Q(self, state, hitobj, dict_act, dict_state_action_visit, params):
         if np.random.rand() <= self.exploration_rate:
             action_idx = np.random.randint(0, self.action_space)
             hitobj.set_prob(1)  # microptimization
-            hitobj.set_BRDF(1)  # microptimization
+            hitobj.set_BRDF((hitobj.get_c().get_max())/math.pi)  # microptimization
             hitobj.set_costheta(1)
             key_state_action_visit = state + (action_idx,)
             if key_state_action_visit not in dict_state_action_visit:
@@ -219,20 +218,23 @@ class DQN:
                 dict_state_action_visit[key_state_action_visit] += 1
             return action_idx, dict_state_action_visit
         idx_action = get_proportional_action(self.table[state][:72], len(self.table[state][:72]))
-        if (idx_action < 12):
-            prob_patch = 0.045620675
-        elif (idx_action >= 12 and idx_action < 24):
-            prob_patch = 0.050461491
-        elif (idx_action >= 24 and idx_action < 36):
-            prob_patch = 0.057276365
-        elif (idx_action >= 36 and idx_action < 48):
-            prob_patch = 0.067940351
-        elif (idx_action >= 48 and idx_action < 60):
-            prob_patch = 0.088541589
+        if not params['equally_sized_patches']:
+            if (idx_action < 12):
+                prob_patch = 0.045620675
+            elif (idx_action >= 12 and idx_action < 24):
+                prob_patch = 0.050461491
+            elif (idx_action >= 24 and idx_action < 36):
+                prob_patch = 0.057276365
+            elif (idx_action >= 36 and idx_action < 48):
+                prob_patch = 0.067940351
+            elif (idx_action >= 48 and idx_action < 60):
+                prob_patch = 0.088541589
+            else:
+                prob_patch = 0.213758305
         else:
-            prob_patch = 0.213758305
+            prob_patch = (2 * math.pi) / 72
         hitobj.set_prob((self.table[state][72] * prob_patch) / (self.table[state][idx_action]))  # prob of getting the hights value (1) times prob scattering to a specific direction inside the action patch
-        hitobj.set_BRDF(1 / math.pi)
+        hitobj.set_BRDF((hitobj.get_c().get_max()) / math.pi)
         hitobj.set_costheta(dict_act[idx_action].get_z())
 
         key_state_action_visit = state + (idx_action,)
@@ -254,7 +256,7 @@ class DQN:
             if params['select_max_Q']:
                 action_int_q = np.argmax(prediction[0])
                 cos_theta_q = dict_act[action_int_q].get_z()
-                target = reward + np.amax(prediction[0]) * cos_theta_q #* BRDF
+                target = reward + np.amax(prediction[0]) * cos_theta_q * BRDF * 2 * math.pi
             else:
                 # Average Q
                 cumulative_q_value = cumulative_q(dict_act, nl, prediction[0])
@@ -274,20 +276,23 @@ class DQN:
         else:
             cumulative_q = 0
             for i in range(72):
-                if i < 12:
-                    prob_cumulative_q = 0.0871/12
-                elif i >= 12 and i < 24:
-                    prob_cumulative_q = 0.0964/12
-                elif i >= 24 and i < 36:
-                    prob_cumulative_q = 0.1093/12
-                elif i >= 36 and i < 48:
-                    prob_cumulative_q = 0.1297/12
-                elif i >= 48 and i < 60:
-                    prob_cumulative_q = 0.1691/12
+                if not params['equally_sized_patches']:
+                    if i < 12:
+                        prob_cumulative_q = 0.0871/12
+                    elif i >= 12 and i < 24:
+                        prob_cumulative_q = 0.0964/12
+                    elif i >= 24 and i < 36:
+                        prob_cumulative_q = 0.1093/12
+                    elif i >= 36 and i < 48:
+                        prob_cumulative_q = 0.1297/12
+                    elif i >= 48 and i < 60:
+                        prob_cumulative_q = 0.1691/12
+                    else:
+                        prob_cumulative_q = 0.408/12
                 else:
-                    prob_cumulative_q = 0.408/12
+                    prob_cumulative_q = 1/72
                 cumulative_q += (self.table[next_state][i] * dict_act[i].get_z()) * prob_cumulative_q
-            update = self.table[state][action] * (1 - lr) + lr * cumulative_q * BRDF
+            update = self.table[state][action] * (1 - lr) + lr * cumulative_q * BRDF * 2 * math.pi
         self.table[state][action] = update
         total = 0
         for s in range(72):
