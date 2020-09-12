@@ -1,4 +1,4 @@
-from py_smallpt_newactions import main
+from py_smallpt import main
 from utils import create_log
 from GPyOpt.methods import BayesianOptimization
 import datetime
@@ -25,7 +25,7 @@ params['w_training'] = 128
 params['h_training'] = 128
 params['w_test'] = 256
 params['h_test'] = 256
-params['samples_training'] = 8
+params['samples_training'] = 4
 params['samples_test'] = 128
 
 # Options
@@ -34,9 +34,9 @@ params['select_average_Q'] = not params['select_max_Q']
 params['scene'] = '3'
 params['num_object'] = 18 if (params['scene'] == '1' or params['scene'] == '2') else 19
 params['gaussian_kernel'] = True
-params['training'] = False
+params['training'] = True
 params['test'] = True
-params['limit_training'] = 16300 # int(0.8*params['w_training']*params['h_training']) #16300
+params['limit_training'] = 16300
 params['kernel_size'] = 16
 params['bayesOpt'] = False
 params['double_action'] = False
@@ -135,7 +135,8 @@ if __name__ == '__main__':
     if params['bayesOpt'] == False:
         # Set automatic parameters
         lr_string = '{:.8f}'.format(params["learning_rate"])[2:]
-        params['img_title'] = 'DDQN_scene{}_lr{}_struct{}-{}_{}-{}_{}-{}_eps{}_DQN'.format(params['scene'],
+        params['img_title'] = 'DDQN_scene{}_lr{}_struct{}-{}_{}-{}_{}-{}_eps{}_DQN_128' \
+                              ''.format(params['scene'],
                                                                                         lr_string,
                                                                                         params['dense_layer12'],
                                                                                         params['dense_layer3'],

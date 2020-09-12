@@ -149,6 +149,7 @@ class DQN:
             return action_idx
         arr = self.model.predict(state.reshape(1, self.state_space))
         arr[0] = arr[0].clip(min=0.1)
+        arr[0] = arr[0].clip(min=0.1)
         idx_action = get_proportional_action(arr[0], len(arr[0]))
         if (idx_action < 12):
             prob_patch = 0.045620675
@@ -256,13 +257,27 @@ class DQN:
             if params['select_max_Q']:
                 action_int_q = np.argmax(prediction[0])
                 cos_theta_q = dict_act[action_int_q].get_z()
-                target = reward + np.amax(prediction[0]) * cos_theta_q * BRDF * 2 * math.pi
+
+                if action_int_q < 12:
+                    prob_q = 0.0871 / 12
+                elif action_int_q >= 12 and action_int_q < 24:
+                    prob_q = 0.0964 / 12
+                elif action_int_q >= 24 and action_int_q < 36:
+                    prob_q = 0.1093 / 12
+                elif action_int_q >= 36 and action_int_q < 48:
+                    prob_q = 0.1297 / 12
+                elif action_int_q >= 48 and action_int_q < 60:
+                    prob_q = 0.1691 / 12
+                else:
+                    prob_q = 0.408 / 12
+                target = reward + np.amax(prediction[0]) * cos_theta_q * BRDF * 2 * math.pi * prob_q
             else:
                 # Average Q
                 cumulative_q_value = cumulative_q(dict_act, nl, prediction[0])
                 target = reward + 1 / self.action_space * cumulative_q_value * BRDF
 
         target_f = self.model.predict(state.reshape(1, self.state_space))
+
         target_f[0] = target_f[0].clip(min=0.1)
         target_f[0][action] = target
         self.model.fit(state.reshape(1, self.state_space), target_f, epochs=1, verbose=0)

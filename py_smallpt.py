@@ -219,11 +219,14 @@ def main(params):
             final_image = Ls * params['samples_test'] / (s + 1)
             img_title_temp = 'images\\'+ params['img_title'] + '-' + str(s) + ".ppm"
             write_ppm(params['w_test'], params['h_test'], final_image, fname= img_title_temp)
+
             ssim = score(final_image, params['reference_path'], params=params, s=s)
             print("Score: ", ssim)
+            
 
         print("NUMBER OF BOUNCES: ", counter_bounces.full_count / (params['w_test'] * params['h_test'] * params['samples_test']))
     with open(params['path_SSIM_total'], 'a') as file:
         file.write(str(params['img_title']) + ': ' + str(ssim) + '\n');
     return ssim
+
 

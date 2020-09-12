@@ -4,8 +4,9 @@
     <list default="true" id="245e8a6b-1a5b-437b-836d-045cc3259ad7" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DQNAgent_DDQN.py" beforeDir="false" afterPath="$PROJECT_DIR$/DQNAgent_DDQN.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Q_learning_table_prob.p" beforeDir="false" afterPath="$PROJECT_DIR$/Q_learning_table_prob.p" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bayesOpt.py" beforeDir="false" afterPath="$PROJECT_DIR$/bayesOpt.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comparison/.ipynb_checkpoints/comparison-checkpoint.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/comparison/.ipynb_checkpoints/comparison-checkpoint.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/comparison/comparison.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/comparison/comparison.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/py_smallpt_newactions.py" beforeDir="false" afterPath="$PROJECT_DIR$/py_smallpt_newactions.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -31,7 +32,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="ToolWindowEvent Log.ShowToolbar" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Q-path-guiding" />
     <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
     <property name="two.files.diff.last.used.file" value="F:/DATA/smallpt/bayesOpt.py" />
   </component>
@@ -181,46 +182,47 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="92" y="92" width="1736" height="856" key="DiffContextDialog/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1586599120856" />
-    <state x="739" y="274" key="FileChooserDialogImpl" timestamp="1587142434717">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state x="-1329" y="219" key="FileChooserDialogImpl" timestamp="1593630542334">
+      <screen x="-1920" y="0" width="1536" height="832" />
     </state>
+    <state x="-1329" y="219" key="FileChooserDialogImpl/-1920.0.1536.832/0.0.1920.1040@-1920.0.1536.832" timestamp="1593630542334" />
     <state x="739" y="274" key="FileChooserDialogImpl/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587142434717" />
-    <state width="1127" height="301" key="GridCell.Tab.0.bottom" timestamp="1590936980331">
+    <state width="1581" height="290" key="GridCell.Tab.0.bottom" timestamp="1591007265305">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1127" height="301" key="GridCell.Tab.0.bottom/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1590936980331" />
+    <state width="1581" height="290" key="GridCell.Tab.0.bottom/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1591007265305" />
     <state width="1264" height="61" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1590669445304" />
-    <state width="1127" height="301" key="GridCell.Tab.0.center" timestamp="1590936980330">
+    <state width="1581" height="290" key="GridCell.Tab.0.center" timestamp="1591007265305">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1127" height="301" key="GridCell.Tab.0.center/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1590936980330" />
+    <state width="1581" height="290" key="GridCell.Tab.0.center/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1591007265305" />
     <state width="1264" height="61" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1590669445303" />
-    <state width="1127" height="301" key="GridCell.Tab.0.left" timestamp="1590936980330">
+    <state width="1581" height="290" key="GridCell.Tab.0.left" timestamp="1591007265305">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1127" height="301" key="GridCell.Tab.0.left/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1590936980330" />
+    <state width="1581" height="290" key="GridCell.Tab.0.left/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1591007265305" />
     <state width="1264" height="61" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1590669445303" />
-    <state width="1127" height="301" key="GridCell.Tab.0.right" timestamp="1590936980330">
+    <state width="1581" height="290" key="GridCell.Tab.0.right" timestamp="1591007265305">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1127" height="301" key="GridCell.Tab.0.right/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1590936980330" />
+    <state width="1581" height="290" key="GridCell.Tab.0.right/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1591007265305" />
     <state width="1264" height="61" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1590669445304" />
-    <state width="1127" height="301" key="GridCell.Tab.1.bottom" timestamp="1590936958196">
+    <state width="1126" height="301" key="GridCell.Tab.1.bottom" timestamp="1591004441168">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1127" height="301" key="GridCell.Tab.1.bottom/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1590936958196" />
-    <state width="1127" height="301" key="GridCell.Tab.1.center" timestamp="1590936958195">
+    <state width="1126" height="301" key="GridCell.Tab.1.bottom/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1591004441168" />
+    <state width="1126" height="301" key="GridCell.Tab.1.center" timestamp="1591004441168">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1127" height="301" key="GridCell.Tab.1.center/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1590936958195" />
-    <state width="1127" height="301" key="GridCell.Tab.1.left" timestamp="1590936958195">
+    <state width="1126" height="301" key="GridCell.Tab.1.center/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1591004441168" />
+    <state width="1126" height="301" key="GridCell.Tab.1.left" timestamp="1591004441168">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1127" height="301" key="GridCell.Tab.1.left/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1590936958195" />
-    <state width="1127" height="301" key="GridCell.Tab.1.right" timestamp="1590936958196">
+    <state width="1126" height="301" key="GridCell.Tab.1.left/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1591004441168" />
+    <state width="1126" height="301" key="GridCell.Tab.1.right" timestamp="1591004441168">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1127" height="301" key="GridCell.Tab.1.right/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1590936958196" />
+    <state width="1126" height="301" key="GridCell.Tab.1.right/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1591004441168" />
     <state x="461" y="162" key="SettingsEditor" timestamp="1586025484528">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -229,9 +231,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="482" y="225" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1587816651967" />
-    <state x="661" y="344" key="com.intellij.ide.util.TipDialog" timestamp="1590154770456">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state x="-1391" y="275" key="com.intellij.ide.util.TipDialog" timestamp="1593630506607">
+      <screen x="-1920" y="0" width="1536" height="832" />
     </state>
+    <state x="-1391" y="275" key="com.intellij.ide.util.TipDialog/-1920.0.1536.832/0.0.1920.1040@-1920.0.1536.832" timestamp="1593630506607" />
     <state x="661" y="344" key="com.intellij.ide.util.TipDialog/-1920.0.1536.832/0.0.1920.1040@0.0.1920.1040" timestamp="1590154770456" />
   </component>
   <component name="XDebuggerManager">
@@ -264,22 +267,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/DQNAgent_DDQN.py</url>
-          <line>362</line>
+          <line>377</line>
           <option name="timeStamp" value="20" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/DQNAgent_DDQN.py</url>
-          <line>323</line>
+          <line>338</line>
           <option name="timeStamp" value="23" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/py_smallpt_newactions.py</url>
-          <line>99</line>
-          <option name="timeStamp" value="29" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/DQNAgent_DDQN.py</url>
-          <line>274</line>
+          <line>289</line>
           <option name="timeStamp" value="46" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -289,23 +287,18 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/py_smallpt_newactions.py</url>
-          <line>109</line>
-          <option name="timeStamp" value="51" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/DQNAgent_DDQN.py</url>
-          <line>149</line>
-          <option name="timeStamp" value="52" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/py_smallpt_newactions.py</url>
           <line>195</line>
           <option name="timeStamp" value="53" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/DQNAgent_DDQN.py</url>
-          <line>256</line>
-          <option name="timeStamp" value="54" />
+          <url>file://$PROJECT_DIR$/py_smallpt_newactions.py</url>
+          <line>138</line>
+          <option name="timeStamp" value="60" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/py_smallpt_newactions.py</url>
+          <line>152</line>
+          <option name="timeStamp" value="61" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
