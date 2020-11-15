@@ -10,7 +10,6 @@ from keras.regularizers import l2
 from keras.initializers import he_uniform, glorot_uniform
 from keras.layers.normalization import BatchNormalization
 import random
-import sqlite3
 import time
 import socket
 import struct
@@ -148,7 +147,6 @@ class DQN:
             hitobj.set_costheta(1)
             return action_idx
         arr = self.model.predict(state.reshape(1, self.state_space))
-        arr[0] = arr[0].clip(min=0.1)
         arr[0] = arr[0].clip(min=0.1)
         idx_action = get_proportional_action(arr[0], len(arr[0]))
         if (idx_action < 12):

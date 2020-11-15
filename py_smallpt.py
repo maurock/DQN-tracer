@@ -136,12 +136,9 @@ def main(params):
         dict_state_action_visit = dict()
         i = 0
         for y in tqdm(range(params['h_training']), desc='Rendering ({0} spp), learning rate {1:11.8f}'.format(params['samples_training'],agent.learning_rate), position=0, leave=True):
-            if i > params['limit_training']:
-                break
             # pixel row
             #print('\rRendering ({0} spp) {1:0.2f}% learning rate {2:11.8f}'.format(params['samples_training'], 100.0 * y / (params['h_training'] - 1),agent.learning_rate))
             for x in range(params['w_training']):
-
                 if i > params['limit_training']:
                     break
                 for s in range(params['samples_training']):
@@ -160,7 +157,7 @@ def main(params):
                     agent.model_target = agent.model
                     if agent.exploration_rate > agent.epsilon_min:
                         agent.exploration_rate = 1 - 1/agent.epsilon_decay_linear * i
-                if i > params['limit_training']:
+                if i >= params['limit_training']:
                     if not params['Q_Learning']:
                         print("params[weight : ",params['weight'] )
                         agent.model.save_weights("weights\\" + params['weight'])
